@@ -30,9 +30,6 @@ def alerts():
       return render_template('alerts.html', form=form)
     else:
       user = User.query.filter_by(email = session['email']).first()
-
-      print form.location.data
-      print form.keywords.data
       # return render_template('alerts.html', success=True)
 
       location = Location.query.filter_by(id=form.location.data).first()
