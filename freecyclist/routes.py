@@ -2,7 +2,7 @@ from freecyclist import app
 from flask import render_template, request, flash, session, url_for, redirect
 from forms import AlertForm, SignupForm, SigninForm
 from flask_mail import Message, Mail
-from models import db, User
+from models import db, User, Location, Alert
 
 mail = Mail()
 
@@ -17,18 +17,28 @@ def about():
 @app.route('/alerts', methods=['GET', 'POST'])
 def alerts():
   form = AlertForm()
+  locations = Location.query.all()
+  options = []
+  for l in locations:
+    options.append((l.id, l.name))
+
+  form.location.choices = options
 
   if request.method == 'POST':
     if form.validate() == False:
       flash('All fields are required.')
       return render_template('alerts.html', form=form)
     else:
-      msg = Message(form.subject.data, sender='contact@example.com', recipients=['your_email@example.com'])
-      msg.body = """
-      From: %s <%s>
-      %s
-      """ % (form.name.data, form.email.data, form.message.data)
-      mail.send(msg)
+      user = User.query.filter_by(email = session['email']).first()
+
+      print form.location.data
+      print form.keywords.data
+      # return render_template('alerts.html', success=True)
+
+      location = Location.query.filter_by(id=form.location.data).first()
+      alert = Alert(user=user, keywords=form.keywords.data, locations=[location])
+      db.session.add(alert)
+      db.session.commit()
 
       return render_template('alerts.html', success=True)
 
@@ -39,14 +49,12 @@ def alerts():
 def signup():
   form = SignupForm()
   form.validate_on_submit()
+
   if 'email' in session:
-    return redirect(url_for('profile')) 
-  print 'Hit signup route'
+    return redirect(url_for('profile'))
+
   if request.method == 'POST':
-    print 'is post'
-    print request.form
     if form.validate() == False:
-      print 'not valid'
       return render_template('signup.html', form=form)
     else:
       newuser = User(form.email.data, form.password.data)

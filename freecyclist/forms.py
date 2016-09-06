@@ -1,9 +1,11 @@
+from freecyclist import app
+from flask import render_template, request, flash, session, url_for, redirect
 from flask_wtf import Form
-from wtforms import StringField, TextAreaField, SubmitField, validators, ValidationError, PasswordField
-from models import db, User
+from wtforms import StringField, TextAreaField, SubmitField, validators, ValidationError, PasswordField, SelectField
+from models import db, User, Location
 
 class AlertForm(Form):
-  location = StringField("location",  [validators.DataRequired("Please enter a location.")])
+  location = SelectField(u'Field name', coerce=int, choices = [], validators = [validators.DataRequired()])
   keywords = TextAreaField("keywords",  [validators.DataRequired("Please enter one or more keywords.")])
   submit = SubmitField("Send")
 
