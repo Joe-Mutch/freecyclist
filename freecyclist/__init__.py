@@ -1,6 +1,5 @@
 from flask import Flask
 import json
-from pprint import pprint
 
 with open('secrets.json') as data_file:
     data = json.load(data_file)
@@ -23,4 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + data['username'] + ':'
 from models import db
 db.init_app(app)
 
-import freecyclist.routes
+# import freecyclist.routes
+from freecyclist.cron import manager
+
+

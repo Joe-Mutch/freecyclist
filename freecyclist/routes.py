@@ -2,7 +2,7 @@ from freecyclist import app
 from flask import render_template, request, flash, session, url_for, redirect
 from forms import AlertForm, SignupForm, SigninForm
 from flask_mail import Message, Mail
-from models import db, User, Location, Alert, Keyword
+from models import db, User, Location, Alert, Keyword, Result
 
 mail = Mail()
 
@@ -12,6 +12,11 @@ def home():
 
 @app.route('/about')
 def about():
+  meta = db.metadata
+  for table in reversed(meta.sorted_tables):
+    print 'Clear table %s' % table
+    db.session.execute(table.delete())
+  db.session.commit()
   return render_template('about.html')
 
 @app.route('/alerts', methods=['GET', 'POST'])
