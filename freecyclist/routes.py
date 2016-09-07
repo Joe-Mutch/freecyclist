@@ -2,7 +2,7 @@ from freecyclist import app
 from flask import render_template, request, flash, session, url_for, redirect
 from forms import AlertForm, SignupForm, SigninForm
 from flask_mail import Message, Mail
-from models import db, User, Location, Alert
+from models import db, User, Location, Alert, Keyword
 
 mail = Mail()
 
@@ -33,7 +33,18 @@ def alerts():
       # return render_template('alerts.html', success=True)
 
       location = Location.query.filter_by(id=form.location.data).first()
-      alert = Alert(user=user, keywords=form.keywords.data, locations=[location])
+
+      keywords = form.keywords.data.split(',')
+      keyword_objs = []
+      for keyword in keywords:
+        keyword_obj = Keyword.query.filter_by(name=keyword).first()
+        if not keyword_obj:
+          keyword_obj = Keyword(name=keyword)
+          db.session.add(keyword_obj)
+          db.session.commit()
+        keyword_objs.append(keyword_obj)
+
+      alert = Alert(user=user, keywords=keyword_objs, locations=[location])
       db.session.add(alert)
       db.session.commit()
 
