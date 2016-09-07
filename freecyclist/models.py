@@ -23,8 +23,14 @@ class User(db.Model):
   def check_password(self, password):
     return check_password_hash(self.pwdhash, password)
 
+
 locations = db.Table('locations',
     db.Column('location_id', db.Integer, db.ForeignKey('location.id')),
+    db.Column('alert_id', db.Integer, db.ForeignKey('alert.id'))
+)
+
+keywords = db.Table('keywords',
+    db.Column('keyword_id', db.Integer, db.ForeignKey('keyword.id')),
     db.Column('alert_id', db.Integer, db.ForeignKey('alert.id'))
 )
 
@@ -32,7 +38,8 @@ class Alert(db.Model):
   # __tablename__ = 'alerts'
   id = db.Column(db.Integer, primary_key = True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-  keywords = db.Column(db.Text)
+  keywords = db.relationship('Keyword', secondary=keywords,
+        backref=db.backref('alerts', lazy='dynamic'))
   locations = db.relationship('Location', secondary=locations,
         backref=db.backref('alerts', lazy='dynamic'))
 
@@ -42,6 +49,14 @@ class Alert(db.Model):
     self.keywords = keywords
 
 class Location(db.Model):
+  # __tablename__ = 'location'
+  id = db.Column(db.Integer, primary_key = True)
+  name = db.Column(db.String(120))
+
+  def __init__(self, name):
+    self.name = name.lower()
+
+class Keyword(db.Model):
   # __tablename__ = 'location'
   id = db.Column(db.Integer, primary_key = True)
   name = db.Column(db.String(120))
