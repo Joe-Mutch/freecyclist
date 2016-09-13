@@ -12,11 +12,15 @@ def home():
 
 @app.route('/about')
 def about():
-  meta = db.metadata
-  for table in reversed(meta.sorted_tables):
-    print 'Clear table %s' % table
-    db.session.execute(table.delete())
-  db.session.commit()
+  user = User.query.filter_by(email = session['email']).first()
+  user.notify(None)
+  # msg = Message("Hello",
+  #                 sender="joe.mutch@gmail.com",
+  #                 recipients=["joe.mutch@gmail.com"])
+  # msg.body = "testing"
+  # msg.html = "<b>testing</b>"
+  # mail.send(msg)
+
   return render_template('about.html')
 
 @app.route('/alerts', methods=['GET', 'POST'])

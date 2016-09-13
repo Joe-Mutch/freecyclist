@@ -1,10 +1,12 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
+from flask_mail import Message, Mail
 from freecyclist import app
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+mail = Mail()
 
 class User(db.Model):
   # __tablename__ = 'users'
@@ -28,7 +30,13 @@ class User(db.Model):
     return alerts
 
   def notify(self, result):
-    print 'sending email'
+    print ' NOTIFYING USER '
+    msg = Message("New Freecycle Alert: %s" % result.title,
+                sender="joe.mutch@gmail.com",
+                recipients=[self.email])
+    msg.body = "notifying user"
+    msg.html ='Found: <a href="%s">%s</a>' % (result.url, result.title)
+    mail.send(msg)
 
 
 locations = db.Table('locations',
@@ -69,6 +77,12 @@ class Alert(db.Model):
     self.user = user
     self.locations = locations
     self.keywords = keywords
+
+  def get_location_names(self):
+    return [l.name for l in self.locations]
+
+  def get_keyword_names(self):
+    return [l.name for l in self.keywords]
 
 class Location(db.Model):
   # __tablename__ = 'location'
